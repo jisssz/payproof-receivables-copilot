@@ -41,6 +41,17 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.get("/")
+def root():
+    return {
+        "service": "PayProof — Receivables Copilot API",
+        "status": "online",
+        "version": "1.0.0",
+        "docs_url": "/docs",
+        "health_check": "/api/health",
+        "frontend_url": "https://payproof-copilot-ten.vercel.app"
+    }
+
 @app.get("/api/health")
 def health_check():
     return {

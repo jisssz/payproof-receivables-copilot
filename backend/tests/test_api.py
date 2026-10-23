@@ -9,6 +9,13 @@ client = TestClient(app)
 def reset_store():
     store.reset_to_synthetic_data()
 
+def test_root_endpoint():
+    response = client.get("/")
+    assert response.status_code == 200
+    data = response.json()
+    assert data["service"] == "PayProof — Receivables Copilot API"
+    assert "health_check" in data
+
 def test_health_check():
     response = client.get("/api/health")
     assert response.status_code == 200
