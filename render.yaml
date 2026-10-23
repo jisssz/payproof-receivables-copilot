@@ -1,0 +1,19 @@
+services:
+  # =============================================================================
+  # Render Web Service: PayProof FastAPI Backend
+  # =============================================================================
+  - type: web
+    name: payproof-backend
+    runtime: python
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /api/health
+    plan: free
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.10
+      - key: FRONTEND_ORIGINS
+        value: http://localhost:5173,http://localhost:4173
+      - key: OPENAI_API_KEY
+        sync: false
