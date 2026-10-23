@@ -10,6 +10,10 @@ import {
   MessageSquare,
   AlertCircle,
   RefreshCw,
+  ExternalLink,
+  ShieldAlert,
+  HeartHandshake,
+  Gavel,
 } from 'lucide-react';
 
 interface AiCopilotModalProps {
@@ -64,6 +68,22 @@ export const AiCopilotModal: React.FC<AiCopilotModalProps> = ({ invoice, onClose
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const handleLaunchEmail = () => {
+    const to = invoice.customer_email || '';
+    const mailtoUrl = `mailto:${to}?subject=${encodeURIComponent(
+      editableSubject
+    )}&body=${encodeURIComponent(editableEmail)}`;
+    window.open(mailtoUrl, '_blank');
+  };
+
+  const handleLaunchWhatsApp = () => {
+    const phone = (invoice.customer_phone || '').replace(/[^0-9]/g, '');
+    const waUrl = `https://api.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(
+      editableWhatsapp
+    )}`;
+    window.open(waUrl, '_blank');
+  };
+
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl shadow-2xl max-w-3xl w-full overflow-hidden border border-slate-200 animate-in fade-in zoom-in-95 duration-150">
@@ -78,6 +98,9 @@ export const AiCopilotModal: React.FC<AiCopilotModalProps> = ({ invoice, onClose
                 <h2 className="text-lg font-bold tracking-tight">AI Follow-up Copilot</h2>
                 <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
                   {reminder?.generated_by === 'openai' ? 'OpenAI GPT' : 'Deterministic Mode'}
+                </span>
+                <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                  Draft Preview
                 </span>
               </div>
               <p className="text-xs text-slate-400">
@@ -98,24 +121,48 @@ export const AiCopilotModal: React.FC<AiCopilotModalProps> = ({ invoice, onClose
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             {(
               [
-                { id: 'friendly', title: 'Friendly Reminder', desc: 'Courteous & relationship-first' },
-                { id: 'firm', title: 'Firm Follow-up', desc: 'Direct, requesting ref #' },
-                { id: 'final_notice', title: 'Final Notice', desc: 'Pre-escalation formal deadline' },
+                {
+                  id: 'friendly',
+                  title: 'Friendly Reminder',
+                  desc: 'Gentle, relationship-first nudge',
+                  icon: HeartHandshake,
+                  color: 'text-sky-600',
+                },
+                {
+                  id: 'firm',
+                  title: 'Firm Follow-up',
+                  desc: 'Direct, requesting UTR ref #',
+                  icon: ShieldAlert,
+                  color: 'text-amber-600',
+                },
+                {
+                  id: 'final_notice',
+                  title: 'Formal Notice',
+                  desc: 'Pre-escalation formal deadline',
+                  icon: Gavel,
+                  color: 'text-rose-600',
+                },
               ] as const
-            ).map((t) => (
-              <button
-                key={t.id}
-                onClick={() => setTone(t.id)}
-                className={`p-3 rounded-xl border text-left transition-all ${
-                  tone === t.id
-                    ? 'border-blue-600 bg-blue-50/50 ring-2 ring-blue-500/20'
-                    : 'border-slate-200 hover:border-slate-300 bg-white'
-                }`}
-              >
-                <p className="text-xs font-bold text-slate-900">{t.title}</p>
-                <p className="text-[11px] text-slate-500 mt-0.5">{t.desc}</p>
-              </button>
-            ))}
+            ).map((t) => {
+              const Icon = t.icon;
+              return (
+                <button
+                  key={t.id}
+                  onClick={() => setTone(t.id)}
+                  className={`p-3 rounded-xl border text-left transition-all ${
+                    tone === t.id
+                      ? 'border-blue-600 bg-blue-50/50 ring-2 ring-blue-500/20'
+                      : 'border-slate-200 hover:border-slate-300 bg-white'
+                  }`}
+                >
+                  <div className="flex items-center space-x-1.5 mb-1">
+                    <Icon className={`w-4 h-4 ${t.color}`} />
+                    <p className="text-xs font-bold text-slate-900">{t.title}</p>
+                  </div>
+                  <p className="text-[11px] text-slate-500">{t.desc}</p>
+                </button>
+              );
+            })}
           </div>
 
           {/* Context and Evidence Toggles */}
@@ -180,28 +227,50 @@ export const AiCopilotModal: React.FC<AiCopilotModalProps> = ({ invoice, onClose
                 </button>
               </div>
 
-              <button
-                onClick={() =>
-                  handleCopy(
-                    activeTab === 'email'
-                      ? `Subject: ${editableSubject}\n\n${editableEmail}`
-                      : editableWhatsapp
-                  )
-                }
-                className="inline-flex items-center space-x-1.5 text-xs font-semibold px-2.5 py-1 rounded-md bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors"
-              >
-                {copied ? (
-                  <>
-                    <Check className="w-3.5 h-3.5 text-emerald-600" />
-                    <span className="text-emerald-700 font-bold">Copied!</span>
-                  </>
+              <div className="flex items-center space-x-2">
+                {activeTab === 'email' ? (
+                  <button
+                    onClick={handleLaunchEmail}
+                    title="Launch default email app"
+                    className="inline-flex items-center space-x-1 text-xs font-medium text-blue-700 bg-blue-50 hover:bg-blue-100 px-2.5 py-1 rounded-md transition-colors border border-blue-200"
+                  >
+                    <ExternalLink className="w-3 h-3" />
+                    <span>Open in Email App</span>
+                  </button>
                 ) : (
-                  <>
-                    <Copy className="w-3.5 h-3.5" />
-                    <span>Copy Text</span>
-                  </>
+                  <button
+                    onClick={handleLaunchWhatsApp}
+                    title="Open in WhatsApp Web"
+                    className="inline-flex items-center space-x-1 text-xs font-medium text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-2.5 py-1 rounded-md transition-colors border border-emerald-200"
+                  >
+                    <ExternalLink className="w-3 h-3" />
+                    <span>Open in WhatsApp</span>
+                  </button>
                 )}
-              </button>
+
+                <button
+                  onClick={() =>
+                    handleCopy(
+                      activeTab === 'email'
+                        ? `Subject: ${editableSubject}\n\n${editableEmail}`
+                        : editableWhatsapp
+                    )
+                  }
+                  className="inline-flex items-center space-x-1.5 text-xs font-semibold px-2.5 py-1 rounded-md bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors"
+                >
+                  {copied ? (
+                    <>
+                      <Check className="w-3.5 h-3.5 text-emerald-600" />
+                      <span className="text-emerald-700 font-bold">Copied!</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-3.5 h-3.5" />
+                      <span>Copy Draft</span>
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
 
             {loading ? (
@@ -213,7 +282,7 @@ export const AiCopilotModal: React.FC<AiCopilotModalProps> = ({ invoice, onClose
               <div className="space-y-3">
                 <div>
                   <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">
-                    Subject Line
+                    Subject Line (Editable)
                   </label>
                   <input
                     type="text"

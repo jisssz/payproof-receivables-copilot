@@ -180,6 +180,33 @@ export const InvoiceList: React.FC<InvoiceListProps> = ({
                   {inv.notes && (
                     <p className="text-xs text-slate-500 line-clamp-1">{inv.notes}</p>
                   )}
+                  {/* Inline Document Presence Indicator */}
+                  <div className="flex items-center space-x-1.5 py-0.5">
+                    {inv.evidence.map((ev) => {
+                      const isAttached = ev.status === 'attached';
+                      const label =
+                        ev.type === 'invoice_doc'
+                          ? 'INV'
+                          : ev.type === 'purchase_order'
+                          ? 'PO'
+                          : ev.type === 'delivery_proof'
+                          ? 'POD'
+                          : 'MSG';
+                      return (
+                        <span
+                          key={ev.id}
+                          title={`${ev.name}: ${ev.status}`}
+                          className={`inline-flex items-center text-[10px] px-1.5 py-0.2 rounded font-mono font-bold tracking-tight border ${
+                            isAttached
+                              ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                              : 'bg-slate-50 text-slate-400 border-slate-200 line-through'
+                          }`}
+                        >
+                          {isAttached ? '✓' : '✗'} {label}
+                        </span>
+                      );
+                    })}
+                  </div>
                   <div className="flex items-center space-x-3 text-xs text-slate-400">
                     <span className="flex items-center space-x-1">
                       <Calendar className="w-3 h-3" />
