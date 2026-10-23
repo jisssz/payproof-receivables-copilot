@@ -85,3 +85,15 @@ def test_stats_endpoint():
     assert stats["total_invoices"] >= 5
     assert stats["total_receivables"] > 0
     assert stats["overdue_count"] >= 1
+
+def test_cors_preflight_vercel_origin():
+    response = client.options(
+        "/api/invoices",
+        headers={
+            "Origin": "https://frontend-nine-woad-g8xvq6ys3s.vercel.app",
+            "Access-Control-Request-Method": "GET"
+        }
+    )
+    assert response.status_code == 200
+    assert response.headers.get("access-control-allow-origin") == "https://frontend-nine-woad-g8xvq6ys3s.vercel.app"
+

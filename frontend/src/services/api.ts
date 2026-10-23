@@ -7,7 +7,10 @@ import {
 } from '../types';
 import { INITIAL_MOCK_INVOICES } from '../data/mockData';
 
-const API_BASE = import.meta.env.VITE_API_URL || '';
+const ENV_API_URL = import.meta.env.VITE_API_URL;
+export const API_BASE = (ENV_API_URL && ENV_API_URL.trim() !== '')
+  ? ENV_API_URL.trim().replace(/\/$/, '')
+  : (import.meta.env.PROD ? 'https://payproof-backend.onrender.com' : '');
 
 export const calculateEvidenceScore = (invoice: Invoice): { score: number; summary: string } => {
   const weights: Record<string, number> = {
@@ -155,7 +158,7 @@ export const fallbackGenerateReminder = (
 export const api = {
   async getHealth(): Promise<{ status: string; uptime?: string; service?: string } | null> {
     try {
-      const res = await fetch(`${API_BASE}/api/health`, { signal: AbortSignal.timeout(3000) });
+      const res = await fetch(`${API_BASE}/api/health`, { signal: AbortSignal.timeout(8000) });
       if (res.ok) return await res.json();
     } catch {
       // Backend waking up or offline
