@@ -34,16 +34,24 @@ export function App() {
   };
 
   const loadData = async () => {
-    // Health check
-    const health = await api.getHealth();
-    setBackendOnline(health !== null);
+    try {
+      // Health check
+      const health = await api.getHealth();
+      setBackendOnline(health !== null);
 
-    // Invoices & Stats
-    const invData = await api.getInvoices();
-    setInvoices(invData);
+      // Invoices & Stats
+      const invData = await api.getInvoices();
+      const safeInvoices = Array.isArray(invData) ? invData : [];
+      setInvoices(safeInvoices);
 
-    const statsData = await api.getStats();
-    setStats(statsData || fallbackStats(invData));
+      const statsData = await api.getStats();
+      setStats(statsData || fallbackStats(safeInvoices));
+    } catch (err) {
+      console.warn('Error during initial data load, using safe fallback:', err);
+      const fallback = api.getLocalInvoices();
+      setInvoices(fallback);
+      setStats(fallbackStats(fallback));
+    }
   };
 
   useEffect(() => {

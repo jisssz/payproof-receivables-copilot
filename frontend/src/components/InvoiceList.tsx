@@ -182,7 +182,7 @@ export const InvoiceList: React.FC<InvoiceListProps> = ({
                   )}
                   {/* Inline Document Presence Indicator */}
                   <div className="flex items-center space-x-1.5 py-0.5">
-                    {inv.evidence.map((ev) => {
+                    {(inv.evidence || []).map((ev) => {
                       const isAttached = ev.status === 'attached';
                       const label =
                         ev.type === 'invoice_doc'

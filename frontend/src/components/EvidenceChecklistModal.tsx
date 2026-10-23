@@ -29,7 +29,7 @@ export const EvidenceChecklistModal: React.FC<EvidenceChecklistModalProps> = ({
   const { score, summary } = calculateEvidenceScore(currentInvoice);
 
   const handleStatusChange = (itemId: string, newStatus: EvidenceStatus) => {
-    const updatedEvidence = currentInvoice.evidence.map((item) =>
+    const updatedEvidence = (currentInvoice.evidence || []).map((item) =>
       item.id === itemId ? { ...item, status: newStatus } : item
     );
     const updated = { ...currentInvoice, evidence: updatedEvidence };
@@ -38,7 +38,7 @@ export const EvidenceChecklistModal: React.FC<EvidenceChecklistModalProps> = ({
   };
 
   const handleReferenceChange = (itemId: string, refVal: string) => {
-    const updatedEvidence = currentInvoice.evidence.map((item) =>
+    const updatedEvidence = (currentInvoice.evidence || []).map((item) =>
       item.id === itemId ? { ...item, reference: refVal } : item
     );
     const updated = { ...currentInvoice, evidence: updatedEvidence };
@@ -113,7 +113,7 @@ export const EvidenceChecklistModal: React.FC<EvidenceChecklistModalProps> = ({
               Verification Records
             </h3>
 
-            {currentInvoice.evidence.map((item: EvidenceItem) => {
+            {(currentInvoice.evidence || []).map((item: EvidenceItem) => {
               return (
                 <div
                   key={item.id}

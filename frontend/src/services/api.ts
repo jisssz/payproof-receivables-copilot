@@ -22,8 +22,9 @@ export const calculateEvidenceScore = (invoice: Invoice): { score: number; summa
   let score = 0;
   const attached: string[] = [];
   const missing: string[] = [];
+  const evidenceList = Array.isArray(invoice?.evidence) ? invoice.evidence : [];
 
-  for (const item of invoice.evidence) {
+  for (const item of evidenceList) {
     if (item.status === 'attached') {
       score += weights[item.type] || 10;
       attached.push(item.name + (item.reference ? ` (${item.reference})` : ''));
@@ -85,7 +86,7 @@ export const fallbackGenerateReminder = (
   const { score, summary } = calculateEvidenceScore(inv);
   const fmtAmount = `${inv.currency} ${inv.amount.toLocaleString('en-IN')}`;
 
-  const attachedNames = inv.evidence
+  const attachedNames = (Array.isArray(inv?.evidence) ? inv.evidence : [])
     .filter((e) => e.status === 'attached')
     .map((e) => e.name);
 
@@ -183,7 +184,12 @@ export const api = {
       return INITIAL_MOCK_INVOICES;
     }
     try {
-      return JSON.parse(raw);
+      const parsed = JSON.parse(raw);
+      if (!Array.isArray(parsed)) return INITIAL_MOCK_INVOICES;
+      return parsed.map((inv) => ({
+        ...inv,
+        evidence: Array.isArray(inv?.evidence) ? inv.evidence : [],
+      }));
     } catch {
       return INITIAL_MOCK_INVOICES;
     }
